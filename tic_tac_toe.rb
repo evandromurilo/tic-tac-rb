@@ -5,10 +5,17 @@ class Square
     @center_x = center_x
     @center_y = center_y
     @square = square
+    @half_square = square/2
     @player = 1
+    @highlighted = false
   end
 
   def draw
+    if @highlighted
+      margin = 10
+      Gosu::draw_rect(@center_x-@half_square+margin, @center_y-@half_square+margin, @square-margin*2, @square-margin*2, Gosu::Color::GRAY)
+    end
+    
     if @player == 1
       Gosu::draw_rect(@center_x-30, @center_y-30, 60, 60, Gosu::Color::BLACK)
     elsif @player == 2
@@ -16,6 +23,10 @@ class Square
                           @center_x-30, @center_y+30, Gosu::Color::BLACK,
                           @center_x+30, @center_y+30, Gosu::Color::BLACK)
     end
+  end
+
+  def update(mouse_x, mouse_y)
+    @highlighted = Gosu.distance(mouse_x, mouse_y, @center_x, @center_y) < 50
   end
 end
 
@@ -75,6 +86,14 @@ class Grid
       end
     end
   end
+
+  def update(mouse_x, mouse_y)
+    @grid.each do |line|
+      line.each do |square|
+        square.update(mouse_x, mouse_y)
+      end
+    end
+  end
 end
 
 class TicTacToe < Gosu::Window
@@ -87,6 +106,10 @@ class TicTacToe < Gosu::Window
   def draw
     draw_rect(0, 0, width, height, Gosu::Color::WHITE)
     @grid.draw
+  end
+
+  def update
+    @grid.update(mouse_x, mouse_y)
   end
 end
 
