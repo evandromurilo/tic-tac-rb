@@ -1,5 +1,24 @@
 require 'gosu'
 
+class Square
+  def initialize(center_x, center_y, square)
+    @center_x = center_x
+    @center_y = center_y
+    @square = square
+    @player = 1
+  end
+
+  def draw
+    if @player == 1
+      Gosu::draw_rect(@center_x-30, @center_y-30, 60, 60, Gosu::Color::BLACK)
+    elsif @player == 2
+      Gosu::draw_triangle(@center_x, @center_y-30, Gosu::Color::BLACK,
+                          @center_x-30, @center_y+30, Gosu::Color::BLACK,
+                          @center_x+30, @center_y+30, Gosu::Color::BLACK)
+    end
+  end
+end
+
 class Grid
   def initialize(w, h)
     @center_x = w/2
@@ -8,7 +27,15 @@ class Grid
     @line = @square*3
     @half_line = @line/2
     @half_square = @square/2
-    @grid = [[1, 2, 1], [2, 1, 2], [1, 2, 1]]
+    @grid = []
+
+    0.upto(2) do |y|
+      line = []
+      0.upto(2) do |x|
+        line.push(Square.new(square_center_x(x), square_center_y(y), @square))
+      end
+      @grid.push(line)
+    end
   end
 
   def offset_x(length)
@@ -35,20 +62,6 @@ class Grid
     top_left_grid_y + y*@square + @half_square
   end
 
-  def draw_player1(x, y)
-    center_x = square_center_x(x)
-    center_y = square_center_y(y)
-    Gosu::draw_rect(center_x-30, center_y-30, 60, 60, Gosu::Color::BLACK)
-  end
-
-  def draw_player2(x, y)
-    center_x = square_center_x(x)
-    center_y = square_center_y(y)
-    Gosu::draw_triangle(center_x, center_y-30, Gosu::Color::BLACK,
-                  center_x-30, center_y+30, Gosu::Color::BLACK,
-                  center_x+30, center_y+30, Gosu::Color::BLACK)
-  end
-
   def draw
     Gosu::draw_rect(@center_x-@half_square, @center_y-@half_line, 2, @line, Gosu::Color::BLACK)
     Gosu::draw_rect(@center_x+@half_square, @center_y-@half_line, 2, @line, Gosu::Color::BLACK)
@@ -56,13 +69,9 @@ class Grid
     Gosu::draw_rect(@center_x-@half_line, @center_y-@half_square, @line, 2, Gosu::Color::BLACK)
     Gosu::draw_rect(@center_x-@half_line, @center_y+@half_square, @line, 2, Gosu::Color::BLACK)
     
-    @grid.each_index do |y|
-      @grid[y].each_index do |x|
-        if @grid[y][x] == 1
-          draw_player1(x, y)
-        elsif @grid[y][x] == 2
-          draw_player2(x, y)
-        end
+    @grid.each do |line|
+      line.each do |square|
+        square.draw
       end
     end
   end
