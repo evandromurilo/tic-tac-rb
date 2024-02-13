@@ -41,6 +41,10 @@ class Square
       return false
     end
   end
+
+  def player
+    @player
+  end
 end
 
 class Grid
@@ -117,6 +121,51 @@ class Grid
 
     return false
   end
+
+  def owner?(a, b, c)
+    player = a.player
+    if player != nil && player == b.player && player == c.player
+      return player
+    else
+      return nil
+    end
+  end
+
+  def winner?
+    # horizontal
+    @grid.each do |line|
+      player = owner?(line[0], line[1], line[2])
+      return player if player != nil
+    end
+
+    # vertical
+    0.upto(2) do |col|
+      player = owner?(@grid[0][col], @grid[1][col], @grid[2][col])
+      return player if player != nil
+    end
+
+    # diagonal 1
+    player = owner?(@grid[0][0], @grid[1][1], @grid[2][2])
+    return player if player != nil
+
+    # diagonal 2
+    owner?(@grid[0][2], @grid[1][1], @grid[2][0])
+  end
+
+  def filled?
+    free_count = 0
+    @grid.each do |line|
+      line.each do |square|
+        free_count += 1 if square.player == nil
+      end
+    end
+
+    return free_count == 0
+  end
+
+  def over?
+    return winner? || filled?
+  end
 end
 
 class TicTacToe < Gosu::Window
@@ -125,15 +174,25 @@ class TicTacToe < Gosu::Window
     self.caption = 'Tic Tac Toe'
     @grid = Grid.new(width, height)
     @player = 1
+    @playing = true
+    @font = Gosu::Font.new(30)
   end
 
   def draw
     draw_rect(0, 0, width, height, Gosu::Color::WHITE)
     @grid.draw
+
+    unless @playing
+      @font.draw_text('Game Over', 330, 50, 3, 1, 1, Gosu::Color::BLUE)
+      @font.draw_text('Press space to play again', 240, 500, 3, 1, 1, Gosu::Color::BLUE)
+    end
   end
 
   def update
     @grid.update(mouse_x, mouse_y)
+    if @playing && @grid.over?
+      @playing = false
+    end
   end
 
   def next_player
@@ -145,8 +204,15 @@ class TicTacToe < Gosu::Window
   end
 
   def button_down(id)
-    if id == Gosu::MsLeft
-      next_player() if @grid.handle_click(mouse_x, mouse_y, @player)
+    if @playing
+      if id == Gosu::MsLeft
+        next_player() if @grid.handle_click(mouse_x, mouse_y, @player)
+      end
+    else
+      if id == Gosu::KbSpace
+        @grid = Grid.new(width, height)
+        @playing = true
+      end
     end
   end
 end
