@@ -6,7 +6,7 @@ class Square
     @center_y = center_y
     @square = square
     @half_square = square/2
-    @player = 1
+    @player = nil
     @highlighted = false
   end
 
@@ -25,8 +25,21 @@ class Square
     end
   end
 
+  def hover?(x, y)
+    Gosu.distance(x, y, @center_x, @center_y) < 50
+  end
+
   def update(mouse_x, mouse_y)
-    @highlighted = Gosu.distance(mouse_x, mouse_y, @center_x, @center_y) < 50
+    @highlighted = hover?(mouse_x, mouse_y)
+  end
+
+  def handle_click(mouse_x, mouse_y, player)
+    if hover?(mouse_x, mouse_y) && @player == nil
+      @player = player
+      return true
+    else
+      return false
+    end
   end
 end
 
@@ -94,6 +107,16 @@ class Grid
       end
     end
   end
+
+  def handle_click(mouse_x, mouse_y, player)
+    @grid.each do |line|
+      line.each do |square|
+        return true if square.handle_click(mouse_x, mouse_y, player)
+      end
+    end
+
+    return false
+  end
 end
 
 class TicTacToe < Gosu::Window
@@ -101,6 +124,7 @@ class TicTacToe < Gosu::Window
     super(800, 600)
     self.caption = 'Tic Tac Toe'
     @grid = Grid.new(width, height)
+    @player = 1
   end
 
   def draw
@@ -110,6 +134,20 @@ class TicTacToe < Gosu::Window
 
   def update
     @grid.update(mouse_x, mouse_y)
+  end
+
+  def next_player
+    if @player == 1
+      @player = 2
+    else
+      @player = 1
+    end
+  end
+
+  def button_down(id)
+    if id == Gosu::MsLeft
+      next_player() if @grid.handle_click(mouse_x, mouse_y, @player)
+    end
   end
 end
 
