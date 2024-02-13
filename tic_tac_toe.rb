@@ -36,20 +36,33 @@ class TicTacToe < Gosu::Window
         end
       end
     end
-    
-    draw_player1(offset_x(-@square), offset_y(@square))
-    draw_player2(@center_x, offset_y(@square))
+  end
+
+  def top_left_grid_x
+    @center_x-@half_line
+  end
+
+  def top_left_grid_y
+    @center_y-@half_line
+  end
+  
+  def square_center_x(x)
+    top_left_grid_x + x*@square + @half_square
+  end
+
+  def square_center_y(y)
+    top_left_grid_y + y*@square + @half_square
   end
 
   def draw_player1(x, y)
-    center_x = @center_x-@half_line+@square*x+@half_square
-    center_y = @center_y-@half_line+@square*y+@half_square
+    center_x = square_center_x(x)
+    center_y = square_center_y(y)
     draw_rect(center_x-30, center_y-30, 60, 60, Gosu::Color::BLACK)
   end
 
   def draw_player2(x, y)
-    center_x = @center_x-@half_line+@square*x+@half_square
-    center_y = @center_y-@half_line+@square*y+@half_square
+    center_x = square_center_x(x)
+    center_y = square_center_y(y)
     draw_triangle(center_x, center_y-30, Gosu::Color::BLACK,
                   center_x-30, center_y+30, Gosu::Color::BLACK,
                   center_x+30, center_y+30, Gosu::Color::BLACK)
